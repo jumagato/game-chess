@@ -106,6 +106,20 @@ Only moves that comply with chess rules are offered. Enforced rules:
 - A persistent sidebar panel lists all six piece types with their Unicode glyph and a one-sentence movement description.
 - The guide is always visible and does not require interaction.
 
+### FR-17 Sound Effects
+- A short sound plays when a move is executed; a distinct sound plays when a move captures a piece (including en passant).
+- Sounds are synthesized via the Web Audio API — no external audio files.
+- A sidebar toggle button enables/disables sound effects; the choice persists across reloads (`localStorage`).
+
+### FR-18 Background Music
+- An ambient music loop (randomized notes from a pentatonic scale) can be toggled on/off independently of sound effects.
+- A sidebar toggle button enables/disables the music; the choice persists across reloads (`localStorage`).
+
+### FR-19 Dark/Light Mode
+- A sidebar toggle button switches the page UI (background, panels, sidebar, status bar, buttons, promotion modal) between dark and light themes.
+- The board's square colors, piece glyphs, and move-highlight colors are unaffected by theme — only the surrounding UI changes.
+- The choice persists across reloads (`localStorage`).
+
 ---
 
 ## Non-Functional Requirements
@@ -145,7 +159,6 @@ The following features are intentionally excluded from this implementation:
 - Game save / load / export to PGN
 - Board orientation flip
 - Piece drag-and-drop (click-to-move only)
-- Sound effects
 - Keyboard move entry
 
 ---
@@ -169,3 +182,6 @@ The following features are intentionally excluded from this implementation:
 | AC-13 | Undo restores the exact board position, turn, and move history from before the last move |
 | AC-14 | "New Game" resets everything to the initial position |
 | AC-15 | Move history panel shows correct SAN including `+`, `#`, capture `x`, and castling notation |
+| AC-16 | Executing a non-capturing move plays a distinct sound from a capturing move, when sound effects are enabled |
+| AC-17 | Toggling sound effects off silences move/capture sounds; toggling music on/off starts/stops the ambient loop independently |
+| AC-18 | Toggling dark/light mode changes the page UI colors but not the board's square or piece colors; the choice survives a page reload |

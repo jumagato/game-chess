@@ -19,7 +19,8 @@ game-chess/
 | Rendering | DOM manipulation | Simple for a grid-based game; no canvas needed |
 | Pieces | Unicode chess symbols | No image assets required |
 | Styles | Inline CSS | Keeps the app self-contained |
-| State persistence | In-memory only | Scope of a single session is sufficient |
+| State persistence | In-memory only for game state; `localStorage` for theme/sound/music preferences | Game progress doesn't need to survive a reload; user preferences should |
+| Audio | Web Audio API synthesis | No audio asset files required, stays single-file |
 
 ## State Model
 
@@ -130,3 +131,15 @@ All styles are in a single `<style>` block. Layout uses:
 ## Promotion Modal
 
 A `position: fixed` overlay (`#promo-modal`) is hidden by default (`display: none`) and shown by toggling the `.show` class. Promotion choice buttons are built dynamically from the moving player's color so the correct colored piece glyphs are displayed.
+
+## 3D Board
+
+The board is tilted using CSS perspective rather than a canvas/WebGL approach, keeping the project dependency-free. `#board` (the clickable grid) is wrapped in `#board-3d`, which sets `perspective`. `#board` itself gets `transform: rotateX(10deg)` with `transform-style: preserve-3d`. Because the browser's hit-testing (`elementFromPoint`/click dispatch) resolves against the actual transformed/painted geometry — not raw pointer-coordinate math — clicks land correctly on tilted squares with no JS changes. Square gradients, inset shadows, and a `translateZ(6px)` lift on `.selected` add depth cues; `.in-check` pulses via a `check-pulse` keyframe animation (disabled under `prefers-reduced-motion`).
+
+## Theming (Dark/Light Mode)
+
+All UI colors (page background, panels, sidebar, status bar, buttons, promotion modal) are CSS custom properties defined on `:root`, with a `[data-theme="light"]` block overriding them for light mode. Toggling calls `applyTheme()`, which sets or removes `data-theme="light"` on `<html>`; absence of the attribute falls back to the `:root` (dark) defaults. The choice persists via `localStorage` (`chess-theme`). Deliberately out of scope: the board's light/dark square colors, piece glyphs, and move-highlight colors stay fixed regardless of theme — "site theme" and "board theme" are treated as separate concerns.
+
+## Audio
+
+Sound effects and background music are synthesized live via the Web Audio API (`AudioContext`) — no external audio files, preserving the zero-dependency, single-file design. `playTone(freq, duration, type, peakGain)` builds a short oscillator+gain envelope; `playSound('move' | 'capture')` is called from `executeMove()` right where captures (including en passant) are already detected. Background music (`scheduleMusicLoop()`) picks random notes from a pentatonic scale and self-schedules via `setTimeout`, independent of the sound-effects toggle. Both toggles persist via `localStorage` (`chess-sound-enabled`, `chess-music-enabled`). Per browser autoplay policy, a fresh `AudioContext` starts suspended until a user gesture — a one-time `document` click listener resumes it, and clicking either toggle button itself satisfies that gesture requirement.

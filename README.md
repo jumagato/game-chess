@@ -12,6 +12,9 @@ A beginner-friendly chess game that runs entirely in the browser — no install,
 - **Undo** — step back through the full game history one move at a time
 - **Piece guide** — always-visible reference card explaining how each piece moves
 - **New Game** — reset to the starting position at any time
+- **3D tabletop board** — the board tilts via CSS perspective, with gradient squares, a framed edge, and a pulsing glow on the king when in check
+- **Sound effects & background music** — synthesized move/capture sounds and an ambient music loop, each independently toggleable (no audio files — generated live via the Web Audio API)
+- **Dark/light mode** — toggle the page theme (background, panels, sidebar); your choice is remembered between visits
 
 ## Getting Started
 
