@@ -7,10 +7,50 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
+    :root {
+      --bg: #1a1a2e;
+      --bg-table: radial-gradient(ellipse at 50% 30%, #2e2e52 0%, #1a1a2e 70%);
+      --text: #eee;
+      --text-muted: #ccc;
+      --text-dim: #666;
+      --text-faint: #888;
+      --accent: #f0c040;
+      --panel-bg: #16213e;
+      --panel-border: #2a2a5a;
+      --white-turn: #f0f0f0;
+      --black-turn: #a0c8ff;
+      --check-color: #ff6b6b;
+      --btn-undo-bg: #3a3a6e;
+      --btn-toggle-bg: #2a2a5a;
+      --modal-overlay: rgba(0,0,0,0.7);
+      --promo-hover-bg: #3a3a7e;
+      --board-outline: #14142a;
+    }
+
+    [data-theme="light"] {
+      --bg: #f4f1ea;
+      --bg-table: radial-gradient(ellipse at 50% 30%, #e7e1d3 0%, #f4f1ea 70%);
+      --text: #1f1f1f;
+      --text-muted: #444;
+      --text-dim: #888;
+      --text-faint: #666;
+      --accent: #b8860b;
+      --panel-bg: #ffffff;
+      --panel-border: #d8d2c4;
+      --white-turn: #333333;
+      --black-turn: #2255aa;
+      --check-color: #c0392b;
+      --btn-undo-bg: #cfcabb;
+      --btn-toggle-bg: #e3ddcd;
+      --modal-overlay: rgba(0,0,0,0.4);
+      --promo-hover-bg: #e7e1d3;
+      --board-outline: #b8b2a0;
+    }
+
     body {
       font-family: 'Segoe UI', system-ui, sans-serif;
-      background: #1a1a2e;
-      color: #eee;
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -21,7 +61,7 @@
     h1 {
       font-size: 1.8rem;
       margin-bottom: 6px;
-      color: #f0c040;
+      color: var(--accent);
       letter-spacing: 1px;
     }
 
@@ -29,18 +69,18 @@
       font-size: 1rem;
       margin-bottom: 16px;
       padding: 8px 20px;
-      background: #16213e;
+      background: var(--panel-bg);
       border-radius: 20px;
       min-width: 260px;
       text-align: center;
-      border: 1px solid #2a2a5a;
+      border: 1px solid var(--panel-border);
     }
 
     #status-bar .turn-label { font-weight: bold; }
-    #status-bar .white-turn { color: #f0f0f0; }
-    #status-bar .black-turn { color: #a0c8ff; }
-    #status-bar .check { color: #ff6b6b; font-weight: bold; }
-    #status-bar .game-over { color: #f0c040; font-weight: bold; font-size: 1.1rem; }
+    #status-bar .white-turn { color: var(--white-turn); }
+    #status-bar .black-turn { color: var(--black-turn); }
+    #status-bar .check { color: var(--check-color); font-weight: bold; }
+    #status-bar .game-over { color: var(--accent); font-weight: bold; font-size: 1.1rem; }
 
     #main {
       display: flex;
@@ -64,7 +104,7 @@
 
     .rank-labels, .file-labels {
       display: flex;
-      color: #888;
+      color: var(--text-faint);
       font-size: 0.75rem;
       user-select: none;
     }
@@ -93,14 +133,31 @@
       text-align: center;
     }
 
+    #board-3d {
+      perspective: 1200px;
+      perspective-origin: 50% 20%;
+      padding: 18px;
+      background: var(--bg-table);
+      border-radius: 16px;
+    }
+
     #board {
       display: grid;
       grid-template-columns: repeat(8, 70px);
       grid-template-rows: repeat(8, 70px);
-      border: 3px solid #2a2a5a;
+      border: 3px solid var(--panel-border);
       border-radius: 4px;
       overflow: hidden;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      outline: 8px solid var(--board-outline);
+      outline-offset: -3px;
+      box-shadow:
+        0 8px 32px rgba(0,0,0,0.5),
+        0 22px 45px rgba(0,0,0,0.45),
+        inset 0 0 0 1px rgba(240,192,64,0.15);
+      transform: rotateX(10deg);
+      transform-style: preserve-3d;
+      transform-origin: center bottom;
+      transition: transform 0.3s ease;
     }
 
     .square {
@@ -116,12 +173,19 @@
       user-select: none;
     }
 
-    .square.light { background: #f0d9b5; }
-    .square.dark  { background: #b58863; }
+    .square.light {
+      background: linear-gradient(160deg, #fbe8c8 0%, #f0d9b5 55%, #e0c49a 100%);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), inset 0 -2px 3px rgba(0,0,0,0.12);
+    }
+    .square.dark {
+      background: linear-gradient(160deg, #c79a72 0%, #b58863 55%, #96704f 100%);
+      box-shadow: inset 0 1px 2px rgba(255,255,255,0.18), inset 0 -2px 3px rgba(0,0,0,0.25);
+    }
 
     .square.selected {
       background: #7fc97f !important;
-      box-shadow: inset 0 0 0 3px #3a8a3a;
+      box-shadow: inset 0 0 0 3px #3a8a3a, inset 0 3px 6px rgba(0,0,0,0.3), 0 0 12px rgba(127,201,127,0.5);
+      transform: translateZ(6px);
     }
 
     .square.valid-move::after {
@@ -145,18 +209,45 @@
 
     .square.last-move {
       background: rgba(255, 230, 80, 0.45) !important;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
     }
     .square.light.last-move { background: #cdd44f !important; }
     .square.dark.last-move  { background: #aaa23a !important; }
 
     .square.in-check {
       background: #e05555 !important;
+      box-shadow: inset 0 0 12px rgba(0,0,0,0.4), 0 0 16px rgba(224,85,85,0.7);
+      animation: check-pulse 0.9s ease-in-out infinite;
+    }
+
+    @keyframes check-pulse {
+      0%, 100% { box-shadow: inset 0 0 12px rgba(0,0,0,0.4), 0 0 16px rgba(224,85,85,0.7); }
+      50%      { box-shadow: inset 0 0 12px rgba(0,0,0,0.4), 0 0 28px rgba(224,85,85,1); }
     }
 
     .piece {
       pointer-events: none;
       line-height: 1;
-      filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.4));
+      display: inline-block;
+      text-shadow:
+        0 1px 0 rgba(0,0,0,0.35),
+        0 2px 0 rgba(0,0,0,0.3),
+        0 3px 2px rgba(0,0,0,0.4),
+        1px 4px 4px rgba(0,0,0,0.35);
+      transition: transform 0.12s ease;
+    }
+
+    .square.selected .piece {
+      transform: scale(1.08) translateY(-2px);
+    }
+
+    .square:hover .piece {
+      transform: scale(1.04);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .square.in-check { animation: none; }
+      .piece, #board { transition: none; }
     }
 
     /* Sidebar */
@@ -168,8 +259,8 @@
     }
 
     .panel {
-      background: #16213e;
-      border: 1px solid #2a2a5a;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
       border-radius: 10px;
       padding: 14px;
     }
@@ -178,7 +269,7 @@
       font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: #888;
+      color: var(--text-faint);
       margin-bottom: 10px;
     }
 
@@ -189,10 +280,10 @@
       display: grid;
       grid-template-columns: 26px 1fr 1fr;
       gap: 2px 4px;
-      color: #ccc;
+      color: var(--text-muted);
     }
 
-    #move-list .move-num { color: #666; }
+    #move-list .move-num { color: var(--text-dim); }
     #move-list .move-w, #move-list .move-b { cursor: default; }
 
     #captured {
@@ -212,12 +303,12 @@
       align-items: center;
       gap: 8px;
       margin-bottom: 5px;
-      color: #ccc;
+      color: var(--text-muted);
     }
 
     .guide-piece { font-size: 1.4rem; width: 28px; text-align: center; }
 
-    #btn-row {
+    #btn-row, .btn-row {
       display: flex;
       gap: 10px;
       margin-top: 4px;
@@ -237,15 +328,16 @@
     button:hover { opacity: 0.88; transform: translateY(-1px); }
     button:active { transform: translateY(0); }
 
-    #btn-new { background: #f0c040; color: #1a1a2e; }
-    #btn-undo { background: #3a3a6e; color: #eee; }
+    #btn-new { background: var(--accent); color: #1a1a2e; }
+    #btn-undo { background: var(--btn-undo-bg); color: var(--text); }
+    #btn-sound, #btn-music, #btn-theme { background: var(--btn-toggle-bg); color: var(--text-muted); }
 
     /* Promotion modal */
     #promo-modal {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.7);
+      background: var(--modal-overlay);
       z-index: 100;
       align-items: center;
       justify-content: center;
@@ -254,14 +346,14 @@
     #promo-modal.show { display: flex; }
 
     #promo-box {
-      background: #16213e;
-      border: 2px solid #f0c040;
+      background: var(--panel-bg);
+      border: 2px solid var(--accent);
       border-radius: 14px;
       padding: 24px 32px;
       text-align: center;
     }
 
-    #promo-box h2 { margin-bottom: 16px; color: #f0c040; }
+    #promo-box h2 { margin-bottom: 16px; color: var(--accent); }
 
     #promo-pieces {
       display: flex;
@@ -273,7 +365,7 @@
       font-size: 2.8rem;
       width: 64px;
       height: 64px;
-      background: #2a2a5a;
+      background: var(--btn-toggle-bg);
       border: 2px solid transparent;
       border-radius: 10px;
       cursor: pointer;
@@ -285,8 +377,8 @@
     }
 
     .promo-btn:hover {
-      border-color: #f0c040;
-      background: #3a3a7e;
+      border-color: var(--accent);
+      background: var(--promo-hover-bg);
     }
   </style>
 </head>
@@ -299,7 +391,9 @@
   <div id="board-wrap">
     <div id="board-container">
       <div class="rank-labels" id="rank-labels"></div>
-      <div id="board"></div>
+      <div id="board-3d">
+        <div id="board"></div>
+      </div>
     </div>
     <div class="file-labels" id="file-labels"></div>
   </div>
@@ -309,6 +403,13 @@
       <div id="btn-row">
         <button id="btn-new">New Game</button>
         <button id="btn-undo">Undo</button>
+      </div>
+      <div class="btn-row" style="margin-top: 10px;">
+        <button id="btn-sound"></button>
+        <button id="btn-music"></button>
+      </div>
+      <div class="btn-row" style="margin-top: 10px;">
+        <button id="btn-theme"></button>
       </div>
     </div>
 
@@ -353,6 +454,92 @@ const PIECE_UNICODE = {
 // ─── Game state ───────────────────────────────────────────────────────────────
 let board, turn, selected, validMoves, lastMove, history, capturedPieces;
 let castlingRights, enPassantTarget, halfMoveClock, gameOver;
+
+// ─── Theme ──────────────────────────────────────────────────────────────────
+let theme = localStorage.getItem('chess-theme') || 'dark';
+
+function applyTheme() {
+  if (theme === 'light') {
+    document.documentElement.setAttribute('data-theme', 'light');
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+}
+
+// ─── Audio (synthesized via Web Audio API — no external asset files) ──────────
+let audioCtx = null;
+let musicTimer = null;
+let soundEnabled = localStorage.getItem('chess-sound-enabled') !== 'false';
+let musicEnabled = localStorage.getItem('chess-music-enabled') === 'true';
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playTone(freq, duration, type, peakGain, startOffset = 0) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = type;
+  osc.frequency.value = freq;
+  const start = ctx.currentTime + startOffset;
+  gain.gain.setValueAtTime(0, start);
+  gain.gain.linearRampToValueAtTime(peakGain, start + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(start);
+  osc.stop(start + duration + 0.02);
+}
+
+function playSound(kind) {
+  if (!soundEnabled) return;
+  if (kind === 'move') {
+    playTone(660, 0.09, 'triangle', 0.18);
+  } else if (kind === 'capture') {
+    playTone(300, 0.05, 'sawtooth', 0.22);
+    playTone(150, 0.12, 'sawtooth', 0.18, 0.04);
+  }
+}
+
+// Ambient background loop: random notes from a pentatonic scale, soft attack/release
+const MUSIC_NOTES = [130.81, 146.83, 164.81, 196.00, 220.00]; // C3 D3 E3 G3 A3 pentatonic
+function scheduleMusicLoop() {
+  if (!musicEnabled) return;
+  const ctx = getAudioCtx();
+  const note = MUSIC_NOTES[Math.floor(Math.random() * MUSIC_NOTES.length)];
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sine';
+  osc.frequency.value = note;
+  const now = ctx.currentTime;
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.05, now + 1.5);
+  gain.gain.linearRampToValueAtTime(0, now + 3.5);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(now);
+  osc.stop(now + 3.6);
+  musicTimer = setTimeout(scheduleMusicLoop, 2800);
+}
+
+function startMusic() {
+  if (musicTimer) return;
+  getAudioCtx();
+  scheduleMusicLoop();
+}
+
+function stopMusic() {
+  clearTimeout(musicTimer);
+  musicTimer = null;
+}
+
+// Browsers suspend AudioContext until a user gesture; resume on first interaction
+document.addEventListener('click', () => {
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}, { once: true });
 
 function initGame() {
   board = Array(8).fill(null).map(() => Array(8).fill(null));
@@ -626,6 +813,7 @@ function executeMove(move, promoPiece) {
     const capRow = color === W ? tr + 1 : tr - 1;
     capturedPieces.push(color === W ? 'bP' : 'wP');
   }
+  playSound(captured || move.enPassant ? 'capture' : 'move');
 
   // Update castling rights
   if (type === 'K') { castlingRights[color+'K'] = false; castlingRights[color+'Q'] = false; }
@@ -870,6 +1058,45 @@ function buildLabels() {
 // ─── Bootstrap ────────────────────────────────────────────────────────────────
 document.getElementById('btn-new').addEventListener('click', initGame);
 document.getElementById('btn-undo').addEventListener('click', undoMove);
+
+function updateSoundButton() {
+  document.getElementById('btn-sound').textContent = soundEnabled ? '🔊 Sound: On' : '🔈 Sound: Off';
+}
+function updateMusicButton() {
+  document.getElementById('btn-music').textContent = musicEnabled ? '🎵 Music: On' : '🎵 Music: Off';
+}
+
+document.getElementById('btn-sound').addEventListener('click', () => {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem('chess-sound-enabled', soundEnabled);
+  updateSoundButton();
+  if (soundEnabled) playSound('move');
+});
+
+document.getElementById('btn-music').addEventListener('click', () => {
+  musicEnabled = !musicEnabled;
+  localStorage.setItem('chess-music-enabled', musicEnabled);
+  updateMusicButton();
+  if (musicEnabled) startMusic(); else stopMusic();
+});
+
+updateSoundButton();
+updateMusicButton();
+if (musicEnabled) startMusic();
+
+function updateThemeButton() {
+  document.getElementById('btn-theme').textContent = theme === 'light' ? '☀️ Light Mode' : '🌙 Dark Mode';
+}
+
+document.getElementById('btn-theme').addEventListener('click', () => {
+  theme = theme === 'light' ? 'dark' : 'light';
+  localStorage.setItem('chess-theme', theme);
+  applyTheme();
+  updateThemeButton();
+});
+
+applyTheme();
+updateThemeButton();
 
 buildLabels();
 initGame();
